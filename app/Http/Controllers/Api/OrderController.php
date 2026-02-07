@@ -35,9 +35,9 @@ class OrderController extends Controller
     {
         $validated = $request->validate([
             'table_id' => 'required|exists:tables,id',
-            'items' => 'required|array|min:1',
-            'items.*.food_id' => 'required|exists:foods,id',
-            'items.*.quantity' => 'required|integer|min:1',
+            'items' => 'nullable|array|min:1',
+            'items.*.food_id' => 'required_with:items|exists:foods,id',
+            'items.*.quantity' => 'required_with:items|integer|min:1',
             'items.*.notes' => 'nullable|string',
         ]);
 
