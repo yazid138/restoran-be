@@ -1,0 +1,153 @@
+### Variables
+@baseUrl = http://localhost:8000/api
+
+### ========================================
+### AUTHENTICATION
+### ========================================
+
+### Login as Pelayan (Waiter)
+# @name loginPelayan
+@pelayanToken = {{loginPelayan.response.body.token}}
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "budi@restoran.com",
+  "password": "password"
+}
+
+### Login as Kasir (Cashier)
+# @name loginKasir
+@kasirToken = {{loginKasir.response.body.token}}
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "andi@restoran.com",
+  "password": "password"
+}
+
+### Get Profile
+GET {{baseUrl}}/auth/profile
+Authorization: Bearer {{pelayanToken}}
+
+### Logout
+DELETE {{baseUrl}}/auth/logout
+Authorization: Bearer {{pelayanToken}}
+
+### ========================================
+### TABLES (Public Access)
+### ========================================
+
+### Get all tables
+GET {{baseUrl}}/tables
+
+### Get specific table
+GET {{baseUrl}}/tables/1
+
+### ========================================
+### FOODS (Pelayan Only)
+### ========================================
+
+### Get all foods
+GET {{baseUrl}}/foods?per_page=5&page=2
+Authorization: Bearer {{pelayanToken}}
+
+### Get specific food
+GET {{baseUrl}}/foods/1
+Authorization: Bearer {{pelayanToken}}
+
+### Create new food
+POST {{baseUrl}}/foods
+Authorization: Bearer {{pelayanToken}}
+Content-Type: application/json
+
+{
+  "name": "Test Food",
+  "description": "This is a test food item",
+  "price": 50000,
+  "category": "Test Category",
+  "status": "available"
+}
+
+### Update food
+PUT {{baseUrl}}/foods/29
+Authorization: Bearer {{pelayanToken}}
+Content-Type: application/json
+
+{
+  "name": "Updated Test Food",
+  "price": 55000
+}
+
+### Delete food
+DELETE {{baseUrl}}/foods/29
+Authorization: Bearer {{pelayanToken}}
+
+### ========================================
+### ORDERS
+### ========================================
+
+### Get all orders
+GET {{baseUrl}}/orders
+Authorization: Bearer {{pelayanToken}}
+
+### Get open orders only
+GET {{baseUrl}}/orders?status=open
+Authorization: Bearer {{pelayanToken}}
+
+### Create new order with items (Pelayan only)
+POST {{baseUrl}}/orders
+Authorization: Bearer {{pelayanToken}}
+Content-Type: application/json
+
+{
+  "table_id": 1,
+  "items": [
+    {
+      "food_id": 1,
+      "quantity": 2,
+      "notes": "Extra spicy"
+    },
+    {
+      "food_id": 5,
+      "quantity": 1
+    },
+    {
+      "food_id": 16,
+      "quantity": 3
+    }
+  ]
+}
+
+### Get specific order
+GET {{baseUrl}}/orders/1
+Authorization: Bearer {{pelayanToken}}
+
+### Add items to order (Pelayan only)
+POST {{baseUrl}}/orders/1/items
+Authorization: Bearer {{pelayanToken}}
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "food_id": 1,
+      "quantity": 2,
+      "notes": "Extra spicy"
+    },
+    {
+      "food_id": 5,
+      "quantity": 1
+    },
+    {
+      "food_id": 16,
+      "quantity": 3
+    }
+  ]
+}
+
+### Close order (Kasir only)
+POST {{baseUrl}}/orders/1/close
+Authorization: Bearer {{kasirToken}}
+Content-Type: application/json
