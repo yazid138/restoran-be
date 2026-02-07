@@ -1,0 +1,35 @@
+@baseUrl = http://localhost:8000
+
+@name = Yazid
+@email = yazid@gmail.com
+@password = yazid123
+
+### Register
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "{{name}}",
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+### Login
+# @name login
+@authToken = {{login.response.body.token}}
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+### Logout
+DELETE {{baseUrl}}/api/auth/logout
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+### Get Profile
+GET {{baseUrl}}/api/auth/profile
+Authorization: Bearer {{authToken}}
