@@ -16,6 +16,7 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
+            'role' => 'required|string|in:pelayan,kasir',
         ]);
 
         $user = User::create([
@@ -24,9 +25,16 @@ class AuthController extends Controller
             'password' => Hash::make($validated['password']),
         ]);
 
+        $user->assignRole($validated['role']);
+
         $token = $user->createToken('auth_token', ['*'], now()->addDays(1))->plainTextToken;
 
-        return response()->json(['token' => $token, 'user' => $user], 201);
+        return response()->json(['token' => $token, 'user' => [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'role' => $user->getRoleNames()->first(),
+        ]], 201);
     }
 
     public function login(Request $request)
@@ -37,8 +45,14 @@ class AuthController extends Controller
         ]);
         
         if (Auth::attempt($credentials)) {
-            $token = Auth::user()->createToken('auth_token', ['*'], now()->addDays(1))->plainTextToken;
-            return response()->json(['token' => $token, 'user' => Auth::user()], 200);
+            $user = Auth::user();
+            $token = $user->createToken('auth_token', ['*'], now()->addDays(1))->plainTextToken;
+            return response()->json(['token' => $token, 'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->getRoleNames()->first(),
+            ]], 200);
         }
 
         return response()->json(['error' => 'Unauthorized'], 401);
@@ -46,7 +60,13 @@ class AuthController extends Controller
 
     public function profile(Request $request)
     {
-        return response()->json($request->user(), 200);
+        $user = $request->user();
+        return response()->json([
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'role' => $user->getRoleNames()->first(),
+        ], 200);
     }
 
     public function logout(Request $request)
