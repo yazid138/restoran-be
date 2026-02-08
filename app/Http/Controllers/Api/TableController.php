@@ -41,6 +41,10 @@ class TableController extends Controller
 
     public function update(Request $request, string $id)
     {
+        $validated = $request->validate([
+            'status' => 'required|in:available,occupied,reserved,inactive',
+        ]);
+
         $table = Table::find($id);
 
         if (!$table) {
@@ -49,10 +53,6 @@ class TableController extends Controller
                 'message' => 'Table not found'
             ], 404);
         }
-
-        $validated = $request->validate([
-            'status' => 'required|in:available,occupied,reserved,inactive',
-        ]);
         
         $table->update($validated);
 
