@@ -13,11 +13,16 @@ class FoodController extends Controller
         $perPage = $request->get('per_page', 10);
         $page = $request->get('page', 1);
         $search = $request->get('search');
+        $category = $request->get('category');
 
         $query = Food::query();
 
         if ($request->has('search')) {
             $query->where('name', 'ilike', "%{$search}%");
+        }
+
+        if ($request->has('category')) {
+            $query->where('category', 'ilike', "%{$category}%");
         }
 
         $foods = $query->paginate($perPage, ['*'], 'page', $page);

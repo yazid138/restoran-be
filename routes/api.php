@@ -14,30 +14,34 @@ Route::prefix('/auth')->group(function() {
     Route::get('/profile', [AuthController::class, 'profile'])->middleware('auth:sanctum')->name('profile');
 });
 
-// Public routes - Table dashboard (guest can view)
-Route::get('/tables', [TableController::class, 'index']);
-Route::get('/tables/{id}', [TableController::class, 'show']);
-
 // Authenticated routes
 Route::middleware('auth:sanctum')->group(function () {
-    
-    // Food management (Pelayan only)
-    Route::middleware('role:pelayan')->group(function () {
-        Route::apiResource('foods', FoodController::class);
-    });
+    Route::get('/tables/{id}', [TableController::class, 'show']);
     
     // Order management
     Route::get('/orders', [OrderController::class, 'index']);
     Route::get('/orders/{id}', [OrderController::class, 'show']);
     
-    // Create order and add items (Pelayan only)
+    // Create order and add items
     Route::middleware('role:pelayan')->group(function () {
+        // Table management
+        Route::put('/tables/{id}', [TableController::class, 'update']);
+
+        // Food management
+        Route::apiResource('foods', FoodController::class);
+        
         Route::post('/orders', [OrderController::class, 'store']);
         Route::post('/orders/{id}/items', [OrderController::class, 'addItems']);
+        Route::delete('/orders/{order}/items/{item}', [OrderController::class, 'destroyItem']);
     });
     
-    // Close order (Kasir only)
+    // Close order
     Route::middleware('role:kasir')->group(function () {
         Route::post('/orders/{id}/close', [OrderController::class, 'close']);
     });
 });
+
+// Public routes - Table dashboard (guest can view)
+Route::get('/tables', [TableController::class, 'index']);
+Route::get('/foods', [FoodController::class, 'index']);
+Route::get('/categories', [\App\Http\Controllers\Api\CategoryController::class, 'index']);

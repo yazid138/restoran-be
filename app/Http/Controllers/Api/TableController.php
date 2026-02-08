@@ -4,12 +4,15 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Table;
+use Illuminate\Http\Request;
 
 class TableController extends Controller
 {
     public function index()
     {
-        $tables = Table::all();
+        $tables = Table::query()->with('orders', function($query) {
+            $query->open()->latest()->first();
+        })->orderBy('id', 'asc')->get();
 
         return response()->json([
             'success' => true,
@@ -32,6 +35,30 @@ class TableController extends Controller
 
         return response()->json([
             'success' => true,
+            'data' => $table
+        ]);
+    }
+
+    public function update(Request $request, string $id)
+    {
+        $table = Table::find($id);
+
+        if (!$table) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Table not found'
+            ], 404);
+        }
+
+        $validated = $request->validate([
+            'status' => 'required|in:available,occupied,reserved,inactive',
+        ]);
+        
+        $table->update($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Table status updated successfully',
             'data' => $table
         ]);
     }

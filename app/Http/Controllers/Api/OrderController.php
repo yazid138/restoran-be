@@ -221,4 +221,23 @@ class OrderController extends Controller
             'data' => $order->fresh(['table', 'waiter', 'cashier', 'orderItems.food'])
         ]);
     }
+
+    public function destroyItem(Request $request, Order $order, string $item) {
+        $orderItem = $order->orderItems()->find($item);
+
+        if (!$orderItem) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Order item not found'
+            ], 404);
+        }
+
+        $orderItem->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Order item deleted successfully',
+            'data' => $order->fresh(['orderItems.food'])
+        ]);
+    }
 }
