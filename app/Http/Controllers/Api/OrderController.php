@@ -42,13 +42,12 @@ class OrderController extends Controller
         ]);
 
         // Check if table is available
-        $table = Table::find($validated['table_id']);
-
+        $table = Table::query()->available()->find($validated['table_id']);
         if (!$table) {
             return response()->json([
                 'success' => false,
-                'message' => 'Table not found'
-            ], 404);
+                'message' => 'Table not available'
+            ], 400);
         }
 
         // Check if table already has an open order
