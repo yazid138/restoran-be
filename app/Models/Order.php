@@ -49,6 +49,11 @@ class Order extends Model
         return $query->where('status', 'open');
     }
 
+    public function isOpen(): bool
+    {
+        return $this->status === 'open';
+    }
+
     public function scopeClosed($query)
     {
         return $query->where('status', 'closed');

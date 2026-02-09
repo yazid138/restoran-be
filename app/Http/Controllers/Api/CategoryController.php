@@ -13,8 +13,6 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        // Get unique categories from foods table
-        // Filter out null values just in case
         $categories = Food::select('category')
             ->distinct()
             ->whereNotNull('category')

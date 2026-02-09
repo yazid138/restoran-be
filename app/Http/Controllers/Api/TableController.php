@@ -10,9 +10,7 @@ class TableController extends Controller
 {
     public function index()
     {
-        $tables = Table::query()->with('orders', function($query) {
-            $query->open()->latest()->first();
-        })->orderBy('id', 'asc')->get();
+        $tables = Table::query()->orderBy('id', 'asc')->get();
 
         return response()->json([
             'success' => true,

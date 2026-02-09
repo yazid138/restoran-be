@@ -42,12 +42,12 @@ class OrderController extends Controller
         ]);
 
         // Check if table is available
-        $table = Table::query()->available()->find($validated['table_id']);
+        $table = Table::find($validated['table_id']);
         if (!$table) {
             return response()->json([
                 'success' => false,
-                'message' => 'Table not available'
-            ], 400);
+                'message' => 'Table not found'
+            ], 404);
         }
 
         // Check if table already has an open order
@@ -129,20 +129,13 @@ class OrderController extends Controller
      */
     public function addItems(Request $request, string $id)
     {
-        $order = Order::find($id);
+        $order = Order::open()->find($id);
 
         if (!$order) {
             return response()->json([
                 'success' => false,
                 'message' => 'Order not found'
             ], 404);
-        }
-
-        if ($order->status !== 'open') {
-            return response()->json([
-                'success' => false,
-                'message' => 'Cannot add items to a closed order'
-            ], 400);
         }
 
         $validated = $request->validate([
@@ -188,20 +181,13 @@ class OrderController extends Controller
      */
     public function close(Request $request, string $id)
     {
-        $order = Order::with(['table', 'orderItems.food'])->find($id);
+        $order = Order::open()->with(['table', 'orderItems.food'])->find($id);
 
         if (!$order) {
             return response()->json([
                 'success' => false,
                 'message' => 'Order not found'
             ], 404);
-        }
-
-        if ($order->status === 'closed') {
-            return response()->json([
-                'success' => false,
-                'message' => 'Order is already closed'
-            ], 400);
         }
 
         if ($order->orderItems->count() === 0) {
@@ -222,6 +208,13 @@ class OrderController extends Controller
     }
 
     public function destroyItem(Request $request, Order $order, string $item) {
+        if (!$order->isOpen()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Order is not open'
+            ], 400);
+        }
+
         $orderItem = $order->orderItems()->find($item);
 
         if (!$orderItem) {
